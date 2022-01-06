@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: BUSL-1.1
 
-pragma solidity ^0.8.7;
+pragma solidity =0.8.7;
 
 /**
  * $$$$$$$\                                                $$\     $$$$$$$$\ $$\                                                   
@@ -45,18 +45,17 @@ contract BOGProxyAdmin {
     
     function execute(address target, bytes memory data, uint256 nonce) external onlyOwner {
         bytes32 hash = getOperationHash(target, data, nonce);
-        require(!isPending(hash), "BOGProxyAdmin: NOT_PENDING");
         require(isReady(hash), "BOGProxyAdmin: NOT_READY");
         (bool success, ) = target.call(data);
         require(success, "BOGProxyAdmin: CALL_FAILED");
-        timestamp[hash] = 0;
+        delete timestamp[hash];
         emit ExecutedCall(target, data, nonce);
     }
     
     function cancel(address target, bytes memory data, uint256 nonce) external onlyOwner {
         bytes32 hash = getOperationHash(target, data, nonce);
         require(isPending(hash), "BOGProxyAdmin: !EXISTING_OPERATION");
-        timestamp[hash] = 0;
+        delete timestamp[hash];
         emit CancelledCall(target, data, nonce);
     }
     
